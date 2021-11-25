@@ -146,7 +146,6 @@ func GenerateJWT(useName, email string) (string, error) {
 }
 
 func signIn(w http.ResponseWriter, r *http.Request) {
-	log.Println("call")
 	var userLogin model.Authentication
 	err := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err != nil {
@@ -206,7 +205,7 @@ func MiddlewareValidateUser(next http.Handler) http.Handler {
 		}
 
 		if signInToken == "" {
-			http.Redirect(w, r, "/signin/", http.StatusSeeOther)
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			return
 		}
 
@@ -228,6 +227,6 @@ func MiddlewareValidateUser(next http.Handler) http.Handler {
 			return
 
 		}
-		http.Redirect(w, r, "/signin/", http.StatusSeeOther)
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
 	})
 }

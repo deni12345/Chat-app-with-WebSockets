@@ -16,7 +16,7 @@ document
             .then((res) => {
                 if (res.ok) {
                     return res.json();
-                } else return Promise.reject(response);
+                } else return Promise.reject(res);
             })
             .then((res) => {
                 localStorage.setItem("username", res.username);
