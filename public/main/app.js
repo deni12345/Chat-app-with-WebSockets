@@ -19,14 +19,12 @@ window.onload = function() {
 
 function Send() {
     let newMess = document.getElementById("newMsg");
-    let email = document.getElementById("email").value;
-    let username = document.getElementById("username").value;
     var isAccepted = validfield();
     if (isAccepted) {
         websocket.send(
             JSON.stringify({
-                email: email,
-                username: username,
+                email: localStorage.email,
+                username: localStorage.username,
                 message: newMess.value, // Strip out html
             })
         );
@@ -39,9 +37,7 @@ function Send() {
 
 function validfield() {
     let newMess = document.getElementById("newMsg").value;
-    let email = document.getElementById("email").value;
-    let username = document.getElementById("username").value;
-    if (email == "" || username == "" || newMess == "") return false;
+    if (newMess == "") return false;
     return true;
 }
 

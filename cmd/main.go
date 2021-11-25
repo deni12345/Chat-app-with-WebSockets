@@ -33,16 +33,17 @@ func main() {
 	r := mux.NewRouter()
 	mh = internal.NewHandler(mongoDbConnection)
 
-	r.HandleFunc("/signup", signUp).Methods("GET")
+	r.PathPrefix("/signin").Handler(http.StripPrefix("/signin", http.FileServer(http.Dir("../public/signin")))).Methods("GET")
 	r.HandleFunc("/signin", signIn).Methods("POST")
-	r.HandleFunc("/signup", signUp).Methods("GET")
+
+	r.PathPrefix("/signup").Handler(http.StripPrefix("/signup", http.FileServer(http.Dir("../public/signup")))).Methods("GET")
 	r.HandleFunc("/signup", signUp).Methods("POST")
 
 	subroute := r.PathPrefix("/ws").Subrouter()
 	subroute.HandleFunc("", handleConnections)
 	subroute.Use(MiddlewareValidateUser)
 
-	r.PathPrefix("/home").Handler(MiddlewareValidateUser(http.FileServer(http.Dir("../public"))))
+	r.PathPrefix("/").Handler(MiddlewareValidateUser(http.FileServer(http.Dir("../public/main"))))
 
 	go handleMessage()
 
@@ -145,6 +146,7 @@ func GenerateJWT(useName, email string) (string, error) {
 }
 
 func signIn(w http.ResponseWriter, r *http.Request) {
+	log.Println("call")
 	var userLogin model.Authentication
 	err := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err != nil {
@@ -181,10 +183,9 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var token model.Token
+	var token model.UserInfo
 	token.Email = storedUser.Email
 	token.Username = storedUser.Username
-	token.TokenString = validToken
 	w.Header().Set("Content-Type", "application/json")
 	cookie := &http.Cookie{
 		Name:  "jwt-token",
@@ -203,8 +204,9 @@ func MiddlewareValidateUser(next http.Handler) http.Handler {
 				signInToken = cookie.Value
 			}
 		}
+
 		if signInToken == "" {
-			http.Error(w, " token not found", http.StatusBadRequest)
+			http.Redirect(w, r, "/signin/", http.StatusSeeOther)
 			return
 		}
 
@@ -226,7 +228,6 @@ func MiddlewareValidateUser(next http.Handler) http.Handler {
 			return
 
 		}
-		log.Fatal("hi")
-		http.Error(w, "authenticate fail", http.StatusInternalServerError)
+		http.Redirect(w, r, "/signin/", http.StatusSeeOther)
 	})
 }

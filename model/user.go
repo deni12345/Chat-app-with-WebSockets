@@ -11,8 +11,7 @@ type Authentication struct {
 	Password string `json:"password"`
 }
 
-type Token struct {
-	Username    string `json:"username"`
-	Email       string `json:"email"`
-	TokenString string `json:"token"`
+type UserInfo struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
